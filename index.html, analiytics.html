@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>👑 Premium Restoran</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg,#0f0f0f,#1c1c1c);
+    color: #f5d27a;
+}
+
+header {
+    display:flex;
+    justify-content:space-between;
+    padding:15px;
+    background:black;
+    border-bottom:2px solid gold;
+}
+
+button {
+    padding:8px 10px;
+    border:none;
+    background:gold;
+    cursor:pointer;
+    margin-left:5px;
+    transition:0.3s;
+}
+button:hover { transform:scale(1.05); }
+
+.container { padding:20px; }
+
+.card {
+    background:rgba(255,255,255,0.05);
+    border:1px solid gold;
+    border-radius:12px;
+    padding:15px;
+    margin:15px 0;
+    backdrop-filter:blur(10px);
+}
+
+.price { color:lightgreen; font-weight:bold; }
+
+.input-box {
+    margin-top:8px;
+}
+
+.input-box label {
+    font-size:12px;
+    color:gold;
+}
+
+input, textarea {
+    width:100%;
+    padding:6px;
+    margin-top:5px;
+    border-radius:6px;
+    border:none;
+    outline:none;
+}
+
+.points {
+    text-align:center;
+    font-size:18px;
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>👑 Premium Menü</h2>
+    <div>
+        <button onclick="login('admin')">Admin</button>
+        <button onclick="login('user')">Müşteri</button>
+        <button onclick="goAnalytics()">Analiz</button>
+        <button onclick="showCart()">Sepet</button>
+    </div>
+</header>
+
+<div class="points">⭐ Puan: <span id="puan">0</span></div>
+
+<div class="container" id="menu"></div>
+
+<script>
+// DATA
+let userType = "guest";
+let points = 0;
+let cart = [];
+
+// MENÜ
+let menuData = JSON.parse(localStorage.getItem("menu")) || {
+    "Yemekler":[
+        {id:1,name:"Adana Kebap",price:150},
+        {id:2,name:"Lahmacun",price:80},
+        {id:3,name:"Avokado Tavuk",price:180}
+    ],
+    "Çorbalar":[
+        {id:4,name:"Mercimek",price:60},
+        {id:5,name:"Domates",price:70},
+        {id:6,name:"Mısır",price:75}
+    ]
+};
+
+// SAVE
+function saveMenu(){
+    localStorage.setItem("menu",JSON.stringify(menuData));
+}
+
+// LOGIN
+function login(type){
+    if(type==="admin"){
+        let pass = prompt("Admin şifre:");
+        if(pass!=="1234") return alert("Hatalı şifre");
+        alert("Admin giriş başarılı");
+        adminPanel();
+    } else {
+        alert("Müşteri girişi ⭐");
+    }
+}
+
+// ADMIN EKLE
+function adminPanel(){
+    let name = prompt("Yemek adı:");
+    let price = prompt("Fiyat:");
+
+    if(name && price){
+        menuData["Yemekler"].push({
+            id:Date.now(),
+            name,
+            price:Number(price)
+        });
+
+        saveMenu();
+        loadMenu();
+    }
+}
+
+// MENÜ
+function loadMenu(){
+    let box = document.getElementById("menu");
+    box.innerHTML="";
+
+    for(let c in menuData){
+        box.innerHTML += `<h2>${c}</h2>`;
+
+        menuData[c].forEach(i=>{
+            box.innerHTML += `
+            <div class="card">
+                <h3>${i.name}</h3>
+                <p class="price">${i.price}₺</p>
+
+                <div class="input-box">
+                    <label>Çıkartılacak Malzeme</label>
+                    <input id="r${i.id}">
+                </div>
+
+                <div class="input-box">
+                    <label>Not</label>
+                    <textarea id="n${i.id}"></textarea>
+                </div>
+
+                <button onclick="addToCart(${i.id},${i.price},'${i.name}')">
+                    Sepete Ekle
+                </button>
+            </div>`;
+        });
+    }
+}
+
+// CART
+function addToCart(id,price,name){
+    let r=document.getElementById("r"+id).value;
+    let n=document.getElementById("n"+id).value;
+
+    cart.push({id,price,name,r,n});
+    alert("Sepete eklendi");
+}
+
+// SHOW CART
+function showCart(){
+    let text="SEPET\n\n";
+    cart.forEach(c=>text+=c.name+" "+c.price+"₺\n");
+
+    if(confirm(text+"\nSipariş?")){
+        complete();
+    }
+}
+
+// COMPLETE
+function complete(){
+    cart.forEach(c=>{
+        points+=Math.floor(c.price/10);
+    });
+
+    document.getElementById("puan").innerText=points;
+
+    // ANALİZ VERİSİ
+    let stats = JSON.parse(localStorage.getItem("stats"))||[];
+    let hour=new Date().getHours();
+    stats.push({hour});
+    localStorage.setItem("stats",JSON.stringify(stats));
+
+    cart=[];
+    alert("Sipariş tamamlandı ⭐");
+}
+
+// ANALYTICS
+function goAnalytics(){
+    window.location="analytics.html";
+}
+
+loadMenu();
+</script>
+
+</body>
+</html>
