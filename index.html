@@ -8,65 +8,105 @@
 body {
     margin: 0;
     font-family: Arial;
-    background: linear-gradient(135deg,#0f0f0f,#1c1c1c);
+    background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
     color: #f5d27a;
 }
 
+/* HEADER */
 header {
-    display:flex;
-    justify-content:space-between;
-    padding:15px;
-    background:black;
-    border-bottom:2px solid gold;
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background: rgba(0,0,0,0.9);
+    border-bottom: 2px solid gold;
 }
 
+/* BUTTON */
 button {
-    padding:8px 10px;
-    border:none;
-    background:gold;
-    cursor:pointer;
-    margin-left:5px;
-    transition:0.3s;
+    padding: 8px 12px;
+    border: none;
+    background: gold;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: 0.3s;
 }
-button:hover { transform:scale(1.05); }
+button:hover {
+    transform: scale(1.1);
+    background: orange;
+}
 
-.container { padding:20px; }
+/* CONTAINER */
+.container {
+    padding: 20px;
+}
 
+/* CATEGORY */
+.category h2 {
+    border-left: 5px solid gold;
+    padding-left: 10px;
+}
+
+/* CARD */
 .card {
-    background:rgba(255,255,255,0.05);
-    border:1px solid gold;
-    border-radius:12px;
-    padding:15px;
-    margin:15px 0;
-    backdrop-filter:blur(10px);
+    display: flex;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid gold;
+    border-radius: 15px;
+    margin: 15px 0;
+    overflow: hidden;
+    transition: 0.4s;
 }
 
-.price { color:lightgreen; font-weight:bold; }
-
-.input-box {
-    margin-top:8px;
+.card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px gold;
 }
 
-.input-box label {
-    font-size:12px;
-    color:gold;
+/* IMAGE */
+.card img {
+    width: 120px;
+    object-fit: cover;
 }
 
+/* CONTENT */
+.card-content {
+    padding: 10px;
+    flex: 1;
+}
+
+/* PRICE */
+.price {
+    color: lightgreen;
+    font-weight: bold;
+}
+
+/* INPUT */
 input, textarea {
-    width:100%;
-    padding:6px;
-    margin-top:5px;
-    border-radius:6px;
-    border:none;
-    outline:none;
+    width: 100%;
+    margin: 5px 0;
+    border-radius: 5px;
+    border: none;
+    padding: 5px;
 }
 
+/* POINTS */
 .points {
-    text-align:center;
-    font-size:18px;
-    margin-top:10px;
+    text-align: center;
+    font-size: 20px;
+    margin-top: 10px;
+}
+
+/* FADE IN */
+.fade-in {
+    animation: fadeIn 1s ease-in;
+}
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(20px);}
+    to {opacity:1; transform:translateY(0);}
 }
 </style>
+
 </head>
 
 <body>
@@ -76,7 +116,6 @@ input, textarea {
     <div>
         <button onclick="login('admin')">Admin</button>
         <button onclick="login('user')">Müşteri</button>
-        <button onclick="goAnalytics()">Analiz</button>
         <button onclick="showCart()">Sepet</button>
     </div>
 </header>
@@ -86,133 +125,98 @@ input, textarea {
 <div class="container" id="menu"></div>
 
 <script>
-// DATA
 let userType = "guest";
 let points = 0;
 let cart = [];
 
-// MENÜ
-let menuData = JSON.parse(localStorage.getItem("menu")) || {
-    "Yemekler":[
-        {id:1,name:"Adana Kebap",price:150},
-        {id:2,name:"Lahmacun",price:80},
-        {id:3,name:"Avokado Tavuk",price:180}
+// MENÜ + GÖRSELLER
+let menuData = {
+    "Yemekler": [
+        {id:1, name:"Adana Kebap", price:150, img:"https://i.lezzet.com.tr/images-xxlarge/adana-kebap-tarifi-387f3bc0-9ba7-4162-b9a8-e82273369683"},
+        {id:2, name:"Lahmacun", price:80, img:"https://i.lezzet.com.tr/images-xxlarge-recipe/firinda-lahmacun-44438684-04e2-47bf-995c-712f4028db3f.jpg"},
+        {id:3, name:"Avokado Yatağında Tavuk", price:180, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGfR281MY8ClHskOdmVprOosb_9KzvCtibiw&s"}
     ],
-    "Çorbalar":[
-        {id:4,name:"Mercimek",price:60},
-        {id:5,name:"Domates",price:70},
-        {id:6,name:"Mısır",price:75}
+    "Çorbalar": [
+        {id:4, name:"Mercimek Çorbası", price:60, img:"https://i.lezzet.com.tr/images-xxlarge-recipe/unsuz-mercimek-corbasi-4e0cfce9-1781-467c-90d8-58171f83530b.jpg"},
+        {id:5, name:"Domates Çorbası", price:70, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWGs0e3JxEmLOrJYgJBBkkCuQyGlaABE36IA&s"},
+        {id:6, name:"Mısır Çorbası", price:75, img:"https://www.unileverfoodsolutions.com.tr/dam/global-ufs/mcos/TURKEY/calcmenu/recipes/TR-recipes/general/lahanal%C4%B1-m%C4%B1s%C4%B1r-%C3%A7orbas%C4%B1/preview.jpg"}
+    ],
+    "İçecekler": [
+        {id:7, name:"Kola", price:30, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRymiaR9p8D2qHB2bGw2ao6RO5sM8VY-ACrkg&s"},
+        {id:8, name:"Ayran", price:25, img:"https://www.lengeret.com/tema/genel/uploads/urunler/acikayran.jpg"}
+    ],
+    "Alkollü": [
+        {id:9, name:"Rakı", price:250, img:"https://static.wixstatic.com/media/e754f8_bc63ba86c7e944488cdbd793898a8ba0~mv2.jpg/v1/fill/w_568,h_568,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/e754f8_bc63ba86c7e944488cdbd793898a8ba0~mv2.jpg"},
+        {id:10, name:"Viski", price:300, img:"https://tr.nudeglass.com/cdn/shop/products/duzenlemeler_0000_Lifestyle_-_Arch_Whisky_Glass_-_22153_-_1049891.jpg?v=1571709551"},
+        {id:11, name:"Votka", price:220, img:"https://static.birgun.net/resim/haber/2025/01/06/votka-fiyatlari-2025-guncel.png"}
     ]
 };
 
-// SAVE
-function saveMenu(){
-    localStorage.setItem("menu",JSON.stringify(menuData));
-}
-
 // LOGIN
 function login(type){
-    if(type==="admin"){
-        let pass = prompt("Admin şifre:");
-        if(pass!=="1234") return alert("Hatalı şifre");
-        alert("Admin giriş başarılı");
-        adminPanel();
-    } else {
-        alert("Müşteri girişi ⭐");
-    }
-}
-
-// ADMIN EKLE
-function adminPanel(){
-    let name = prompt("Yemek adı:");
-    let price = prompt("Fiyat:");
-
-    if(name && price){
-        menuData["Yemekler"].push({
-            id:Date.now(),
-            name,
-            price:Number(price)
-        });
-
-        saveMenu();
-        loadMenu();
-    }
+    userType = type;
+    alert(type === "admin" ? "Admin giriş" : "Müşteri giriş - Puan kazanırsın ⭐");
 }
 
 // MENÜ
 function loadMenu(){
-    let box = document.getElementById("menu");
-    box.innerHTML="";
+    const container = document.getElementById("menu");
+    container.innerHTML = "";
 
-    for(let c in menuData){
-        box.innerHTML += `<h2>${c}</h2>`;
+    for(let category in menuData){
+        container.innerHTML += `<div class="category fade-in"><h2>${category}</h2></div>`;
 
-        menuData[c].forEach(i=>{
-            box.innerHTML += `
-            <div class="card">
-                <h3>${i.name}</h3>
-                <p class="price">${i.price}₺</p>
+        menuData[category].forEach(item=>{
+            container.innerHTML += `
+            <div class="card fade-in">
+                <img src="${item.img}">
+                <div class="card-content">
+                    <h3>${item.name}</h3>
+                    <p class="price">${item.price}₺</p>
 
-                <div class="input-box">
-                    <label>Çıkartılacak Malzeme</label>
-                    <input id="r${i.id}">
+                    <input id="r${item.id}" placeholder="Çıkartılacak malzemeler">
+                    <textarea id="n${item.id}" placeholder="Not"></textarea>
+
+                    <button onclick="addToCart(${item.id}, ${item.price}, '${item.name}')">
+                        Sepete Ekle
+                    </button>
                 </div>
-
-                <div class="input-box">
-                    <label>Not</label>
-                    <textarea id="n${i.id}"></textarea>
-                </div>
-
-                <button onclick="addToCart(${i.id},${i.price},'${i.name}')">
-                    Sepete Ekle
-                </button>
             </div>`;
         });
     }
 }
 
-// CART
-function addToCart(id,price,name){
-    let r=document.getElementById("r"+id).value;
-    let n=document.getElementById("n"+id).value;
+// SEPET
+function addToCart(id, price, name){
+    let removed = document.getElementById("r"+id).value;
+    let note = document.getElementById("n"+id).value;
 
-    cart.push({id,price,name,r,n});
+    cart.push({id, price, name, removed, note});
     alert("Sepete eklendi");
 }
 
-// SHOW CART
+// SEPET
 function showCart(){
-    let text="SEPET\n\n";
-    cart.forEach(c=>text+=c.name+" "+c.price+"₺\n");
+    let text = "🛒 SEPET\n\n";
+    cart.forEach(c=> text += `${c.name} - ${c.price}₺\n`);
 
-    if(confirm(text+"\nSipariş?")){
-        complete();
+    if(confirm(text + "\nSipariş ver?")){
+        completeOrder();
     }
 }
 
-// COMPLETE
-function complete(){
+// SİPARİŞ
+function completeOrder(){
     cart.forEach(c=>{
-        points+=Math.floor(c.price/10);
+        points += Math.floor(c.price/10);
     });
 
-    document.getElementById("puan").innerText=points;
-
-    // ANALİZ VERİSİ
-    let stats = JSON.parse(localStorage.getItem("stats"))||[];
-    let hour=new Date().getHours();
-    stats.push({hour});
-    localStorage.setItem("stats",JSON.stringify(stats));
-
-    cart=[];
+    document.getElementById("puan").innerText = points;
     alert("Sipariş tamamlandı ⭐");
+    cart = [];
 }
 
-// ANALYTICS
-function goAnalytics(){
-    window.location="analytics.html";
-}
-
+// INIT
 loadMenu();
 </script>
 
