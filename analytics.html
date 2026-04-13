@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>📊 Analiz Paneli</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    background:black;
+    color:gold;
+    text-align:center;
+    font-family:Arial;
+}
+canvas{max-width:600px;margin:auto;}
+</style>
+</head>
+
+<body>
+
+<h1>📊 Restoran Analiz</h1>
+
+<canvas id="chart"></canvas>
+
+<h2 id="busy"></h2>
+<h2 id="empty"></h2>
+
+<script>
+
+let stats = JSON.parse(localStorage.getItem("stats"))||[];
+
+// saat say
+let hours = Array(24).fill(0);
+
+stats.forEach(s=>{
+    hours[s.hour]++;
+});
+
+// chart data
+let labels = [...Array(24).keys()];
+
+new Chart(document.getElementById("chart"),{
+    type:"line",
+    data:{
+        labels,
+        datasets:[{
+            label:"Müşteri yoğunluğu",
+            data:hours,
+            borderColor:"gold"
+        }]
+    }
+});
+
+// max min
+let max=Math.max(...hours);
+let min=Math.min(...hours);
+
+document.getElementById("busy").innerText=
+"🔥 En yoğun saat: "+hours.indexOf(max)+":00";
+
+document.getElementById("empty").innerText=
+"🧊 En boş saat: "+hours.indexOf(min)+":00";
+
+</script>
+
+</body>
+</html>
